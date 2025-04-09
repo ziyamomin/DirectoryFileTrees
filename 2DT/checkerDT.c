@@ -6,13 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "checkerDT.h"
-/*#include "nodeDT.h"*/
-/*#include "dynarray.h"*/
-/*#include "path.h"*/
 
-/* Helper function to traverse tree and validate nodes */
-
-/* See checkerDT.h for specification */
 boolean CheckerDT_Node_isValid(Node_T oNNode) {
    Node_T oNParent;
    Path_T oPNPath;
@@ -24,7 +18,7 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    Node_T oneNode;
    Node_T twoNode;
 
-   size_t cmp;
+   int cmp;
 
    if(oNNode == NULL) {
       fprintf(stderr, "A node is a NULL pointer\n");
@@ -79,7 +73,7 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
          Node_T oNChild2 = NULL;
          Node_getChild(oNNode, j, &oNChild2);
          if(Path_comparePath(Node_getPath(oNChild1),
-                             Node_getPath(oNChild2)) > 0) {
+                             Node_getPath(oNChild2)) == 0) {
             fprintf(stderr, "Duplicate child path found under node %s: %s\n",
                     Path_getPathname(oPNPath),
                     Path_getPathname(Node_getPath(oNChild1)));
@@ -89,23 +83,28 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    }
 
    /* Check for lexicographic children order */
-
-   for (i = 0; i < ulNumChildren-1; i++) {
-      
-      Node_getChild (oNNode, i, &oneNode);
-      Node_getChild (oNNode, i+1, &twoNode);
-
-      if (Node_getPath (oneNode) == NULL || Node_getPath (twoNode) == NULL) {
+   for (i = 0; i < ulNumChildren - 1; i++) {
+      if (Node_getChild(oNNode, i, &oneNode) != SUCCESS || oneNode == NULL ||
+          Node_getChild(oNNode, i + 1, &twoNode) != SUCCESS || twoNode == NULL) {
+         fprintf(stderr, "Failed to retrieve children at indices %lu and %lu for lexicographic check.\n",
+                 (unsigned long)i, (unsigned long)(i + 1));
          return FALSE;
-      } 
-      
-      cmp = Path_comparePath(Node_getPath (oneNode), Node_getPath(twoNode));
+      }
+
+      if (Node_getPath(oneNode) == NULL || Node_getPath(twoNode) == NULL) {
+         fprintf(stderr, "Child node path is NULL.\n");
+         return FALSE;
+      }
+
+      cmp = Path_comparePath(Node_getPath(oneNode), Node_getPath(twoNode));
       if (cmp > 0){
-         fprintf(stderr, "Children are not in lexicographic order.");
+         fprintf(stderr, "Children are not in lexicographic order: %s > %s\n",
+                 Path_getPathname(Node_getPath(oneNode)),
+                 Path_getPathname(Node_getPath(twoNode)));
          return FALSE;
       }
    }
-   
+
    return TRUE;
 }
 
@@ -119,9 +118,7 @@ static boolean CheckerDT_treeCheck(Node_T oNNode, size_t *pulCount) {
          return FALSE;
       }
 
-      if(pulCount != NULL) {
-         (*pulCount)++;
-      }
+      (*pulCount)++;
 
       ulNumChildren = Node_getNumChildren(oNNode);
       for(i = 0; i < ulNumChildren; i++) {
@@ -140,7 +137,6 @@ static boolean CheckerDT_treeCheck(Node_T oNNode, size_t *pulCount) {
    return TRUE;
 }
 
-/* See checkerDT.h for specification */
 boolean CheckerDT_isValid(boolean bIsInitialized, Node_T oNRoot,
                           size_t ulCount) {
    size_t ulTraverseCount = 0;
