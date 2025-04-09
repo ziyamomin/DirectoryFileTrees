@@ -87,7 +87,12 @@ int FT_insertDir(const char *pcPath) {
 
     /* Loop through each prefix of the path EXCEPT the last one */
     for (i = 1; i < depth; i++) {
-        Path_T oPrefix = Path_prefix(oNewPath, i);  // get /a, /a/b, etc.
+Path_T oPrefix = NULL; // will hold the result
+int prefixStatus = Path_prefix(oNewPath, i, &oPrefix);
+if (prefixStatus != SUCCESS) {
+    Path_free(oNewPath);
+    return MEMORY_ERROR;
+}
 
         /* Ensure we successfully created the prefix */
         if (oPrefix == NULL) {
