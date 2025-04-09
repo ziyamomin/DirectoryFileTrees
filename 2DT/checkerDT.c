@@ -21,8 +21,8 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    size_t ulNumChildren;
    size_t i, j;
 
-   Node_T oNFirst;
-   Node_T oNSecond;
+   Node_T one;
+   Node_T two;
 
    size_t cmp;
 
@@ -90,11 +90,11 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
 
    /* Check for lexicographic children order */
    for (i = 0; i < ulNumChildren-1; i++) {
-      oNFirst = NULL;
-      Node_getChild(oNNode, i, &oNFirst);
-      oNSecond = NULL;
-      Node_getChild(oNNode, i + 1 , &oNSecond);
-      cmp = Node_compare(oNFirst, oNSecond);
+      one = NULL;
+      Node_getChild(oNNode, i, &one);
+      two = NULL;
+      Node_getChild(oNNode, i + 1 , &two);
+      cmp = Node_compare(one, two);
       if (cmp > 0) {
          fprintf(stderr, "Children are not in lexicographic order.");
          return FALSE;
