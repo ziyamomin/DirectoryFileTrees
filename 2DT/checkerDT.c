@@ -79,7 +79,7 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
          Node_T oNChild2 = NULL;
          Node_getChild(oNNode, j, &oNChild2);
          if(Path_comparePath(Node_getPath(oNChild1),
-                             Node_getPath(oNChild2)) == 0) {
+                             Node_getPath(oNChild2)) > 0) {
             fprintf(stderr, "Duplicate child path found under node %s: %s\n",
                     Path_getPathname(oPNPath),
                     Path_getPathname(Node_getPath(oNChild1)));
