@@ -17,6 +17,7 @@
 #include "dynarray.h"
 #include "nodeFT.h"
 #include "ft.h"
+#include <string.h>
 
 
 static boolean bIsInitialized = FALSE;   /* Indicates if FT is initialized */
