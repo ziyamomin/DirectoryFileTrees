@@ -105,8 +105,8 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    }
    
    return TRUE;
+   */
 }
-*/
  
 static boolean CheckerDT_treeCheck(Node_T oNNode, size_t *pulCount) {
    size_t i;
