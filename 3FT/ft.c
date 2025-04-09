@@ -11,6 +11,8 @@
 
 #include <stddef.h>
 #include "a4def.h"
+#include "nodeFT.h"
+
 
 static boolean bIsInitialized = FALSE;   /* Indicates if FT is initialized */
 static Node_T oRoot = NULL;              /* The root node of the File Tree */
