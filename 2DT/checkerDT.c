@@ -99,9 +99,8 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
       }
 
 
-      one = NULL;
+
       Node_getChild(oNNode, i, &one);
-      two = NULL;
       Node_getChild(oNNode, i + 1 , &two);
       cmp = Node_compare(one, two);
       if (cmp > 0){
