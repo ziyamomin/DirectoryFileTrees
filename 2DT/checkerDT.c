@@ -24,9 +24,6 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    Node_T oneNode;
    Node_T twoNode;
 
-   Path_T onePath;
-   Path_T twoPath;
-
    size_t cmp;
 
    if(oNNode == NULL) {
