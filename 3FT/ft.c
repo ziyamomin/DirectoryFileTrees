@@ -9,9 +9,14 @@
   may be internal nodes or leaves, and files are always leaves.
 */
 
-#include <stddef.h>
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "a4def.h"
+#include "path.h"
+#include "dynarray.h"
 #include "nodeFT.h"
+#include "ft.h"
 
 
 static boolean bIsInitialized = FALSE;   /* Indicates if FT is initialized */
