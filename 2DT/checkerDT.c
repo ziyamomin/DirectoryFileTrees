@@ -1,35 +1,44 @@
 /*--------------------------------------------------------------------*/
 /* checkerDT.c                                                        */
-/* Author:                                                            */
 /*--------------------------------------------------------------------*/
 
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include "checkerDT.h"
-#include "dynarray.h"
-#include "path.h"
+/*#include "nodeDT.h"*/
+/*#include "dynarray.h"*/
+/*#include "path.h"*/
 
+/* Helper function to traverse tree and validate nodes */
 
-
-/* see checkerDT.h for specification */
+/* See checkerDT.h for specification */
 boolean CheckerDT_Node_isValid(Node_T oNNode) {
    Node_T oNParent;
    Path_T oPNPath;
    Path_T oPPPath;
 
-   /* Sample check: a NULL pointer is not a valid node */
+   size_t ulNumChildren;
+   size_t i, j;
+
    if(oNNode == NULL) {
       fprintf(stderr, "A node is a NULL pointer\n");
       return FALSE;
    }
 
-   /* Sample check: parent's path must be the longest possible
-      proper prefix of the node's path */
+   oPNPath = Node_getPath(oNNode);
+   if(oPNPath == NULL) {
+      fprintf(stderr, "A node's path is NULL\n");
+      return FALSE;
+   }
+
    oNParent = Node_getParent(oNNode);
    if(oNParent != NULL) {
-      oPNPath = Node_getPath(oNNode);
       oPPPath = Node_getPath(oNParent);
+      if(oPPPath == NULL) {
+         fprintf(stderr, "Parent node's path is NULL\n");
+         return FALSE;
+      }
 
       if(Path_getSharedPrefixDepth(oPNPath, oPPPath) !=
          Path_getDepth(oPNPath) - 1) {
@@ -39,60 +48,124 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
       }
    }
 
+   /* Check children list */
+   ulNumChildren = Node_getNumChildren(oNNode);
+   for(i = 0; i < ulNumChildren; i++) {
+      Node_T oNChild = NULL;
+      int iStatus = Node_getChild(oNNode, i, &oNChild);
+      if(iStatus != SUCCESS || oNChild == NULL) {
+         fprintf(stderr, "Child %lu of node %s is NULL or cannot be fetched\n",
+                 (unsigned long)i, Path_getPathname(oPNPath));
+         return FALSE;
+      }
+
+      if(Node_getParent(oNChild) != oNNode) {
+         fprintf(stderr, "Child's parent pointer does not match expected parent: %s\n",
+                 Path_getPathname(Node_getPath(oNChild)));
+         return FALSE;
+      }
+   }
+
+   /* Check for duplicate children */
+   for(i = 0; i < ulNumChildren; i++) {
+      Node_T oNChild1 = NULL;
+      Node_getChild(oNNode, i, &oNChild1);
+      for(j = i + 1; j < ulNumChildren; j++) {
+         Node_T oNChild2 = NULL;
+         Node_getChild(oNNode, j, &oNChild2);
+         if(Path_comparePath(Node_getPath(oNChild1),
+                             Node_getPath(oNChild2)) == 0) {
+            fprintf(stderr, "Duplicate child path found under node %s: %s\n",
+                    Path_getPathname(oPNPath),
+                    Path_getPathname(Node_getPath(oNChild1)));
+            return FALSE;
+         }
+      }
+   }
+
+   /* Check for lexicographic children order */
+   for (i = 0; i < ulNumChildren-1; i++) {
+      Node_T oNFirst = NULL;
+      Node_getChild(oNNode, i, &oNFirst);
+      Node_T oNSecond = NULL;
+      Node_getChild(oNNode, j, &oNSecond);
+      size_t cmp = Node_compare(Node_T oNFirst, Node_T oNSecond);
+      if (cmp > 0) {
+         fprintf(stderr, "Children are not in lexicographic order.");
+         return FALSE;
+      }
+   }
+   
    return TRUE;
 }
 
-/*
-   Performs a pre-order traversal of the tree rooted at oNNode.
-   Returns FALSE if a broken invariant is found and
-   returns TRUE otherwise.
+static boolean CheckerDT_treeCheck(Node_T oNNode, size_t *pulCount) {
+   size_t i;
+   size_t ulNumChildren;
+   assert (pulCount != NULL);
 
-   You may want to change this function's return type or
-   parameter list to facilitate constructing your checks.
-   If you do, you should update this function comment.
-*/
-static boolean CheckerDT_treeCheck(Node_T oNNode) {
-   size_t ulIndex;
-
-   if(oNNode!= NULL) {
-
-      /* Sample check on each node: node must be valid */
-      /* If not, pass that failure back up immediately */
-      if(!CheckerDT_Node_isValid(oNNode))
+   if(oNNode != NULL) {
+      if(!CheckerDT_Node_isValid(oNNode)) {
          return FALSE;
+      }
 
-      /* Recur on every child of oNNode */
-      for(ulIndex = 0; ulIndex < Node_getNumChildren(oNNode); ulIndex++)
-      {
+      if(pulCount != NULL) {
+         (*pulCount)++;
+      }
+
+      ulNumChildren = Node_getNumChildren(oNNode);
+      for(i = 0; i < ulNumChildren; i++) {
          Node_T oNChild = NULL;
-         int iStatus = Node_getChild(oNNode, ulIndex, &oNChild);
-
-         if(iStatus != SUCCESS) {
-            fprintf(stderr, "getNumChildren claims more children than getChild returns\n");
+         if(Node_getChild(oNNode, i, &oNChild) != SUCCESS || oNChild == NULL) {
+            fprintf(stderr, "Failed to fetch child %lu in traversal\n",
+                    (unsigned long)i);
             return FALSE;
          }
 
-         /* if recurring down one subtree results in a failed check
-            farther down, passes the failure back up immediately */
-         if(!CheckerDT_treeCheck(oNChild))
+         if(!CheckerDT_treeCheck(oNChild, pulCount)) {
             return FALSE;
+         }
       }
    }
    return TRUE;
 }
 
-/* see checkerDT.h for specification */
+/* See checkerDT.h for specification */
 boolean CheckerDT_isValid(boolean bIsInitialized, Node_T oNRoot,
                           size_t ulCount) {
+   size_t ulTraverseCount = 0;
 
-   /* Sample check on a top-level data structure invariant:
-      if the DT is not initialized, its count should be 0. */
-   if(!bIsInitialized)
+   if(!bIsInitialized) {
       if(ulCount != 0) {
          fprintf(stderr, "Not initialized, but count is not 0\n");
          return FALSE;
       }
+      if(oNRoot != NULL) {
+         fprintf(stderr, "Not initialized, but root is not NULL\n");
+         return FALSE;
+      }
+      return TRUE;
+   }
 
-   /* Now checks invariants recursively at each node from the root. */
-   return CheckerDT_treeCheck(oNRoot);
+   if(ulCount == 0 && oNRoot != NULL) {
+      fprintf(stderr, "Count is 0, but root is not NULL\n");
+      return FALSE;
+   }
+
+   if(ulCount > 0 && oNRoot == NULL) {
+      fprintf(stderr, "Count is positive, but root is NULL\n");
+      return FALSE;
+   }
+
+   if(!CheckerDT_treeCheck(oNRoot, &ulTraverseCount)) {
+      return FALSE;
+   }
+
+   if(ulTraverseCount != ulCount) {
+      fprintf(stderr, "Node count mismatch: expected %lu, got %lu\n",
+              (unsigned long)ulCount, (unsigned long)ulTraverseCount);
+      return FALSE;
+   }
+
+   return TRUE;
 }
