@@ -21,6 +21,9 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    size_t ulNumChildren;
    size_t i, j;
 
+   Node_T oneNode;
+   Node_T twoNode;
+
    Path_T onePath;
    Path_T twoPath;
 
@@ -91,7 +94,10 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    /* Check for lexicographic children order */
 
    for (i = 0; i < ulNumChildren-1; i++) {
-      cmp = Path_comparePath(onePath, twoPath);
+
+      Node_getChild (oNNode, i, &oneNode);
+      Node_getChild (oNNode, i+1, &twoNode);
+      cmp = Path_comparePath(Node_getPath (oneNode), Node_getPath(twoNode));
       if (cmp > 0){
          fprintf(stderr, "Children are not in lexicographic order.");
          return FALSE;
