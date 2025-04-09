@@ -21,8 +21,8 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    size_t ulNumChildren;
    size_t i, j;
 
-   Node_T one;
-   Node_T two;
+   Path_T one;
+   Path_T two;
 
    size_t cmp;
 
