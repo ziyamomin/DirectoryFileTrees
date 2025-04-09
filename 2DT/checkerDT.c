@@ -94,7 +94,7 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
 
       Node_getChild(oNNode, i, &one);
       Node_getChild(oNNode, i + 1 , &two);
-      cmp = Node_compare(one, two);
+      cmp = Path_comparePath(one, two);
       if (cmp > 0){
          fprintf(stderr, "Children are not in lexicographic order.");
          return FALSE;
