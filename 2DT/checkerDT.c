@@ -91,13 +91,9 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    /* Check for lexicographic children order */
 
    for (i = 0; i < ulNumChildren-1; i++) {
-      
-      if (Node_getChild(oNNode, i, &one) != SUCCESS || one == NULL ||
-         Node_getChild(oNNode, i + 1, &two) != SUCCESS || two == NULL) {
-            fprintf(stderr, "Failed to retrieve child nodes.\n");
-            return FALSE;
-      }
 
+      Node_getChild(oNNode, i, &one);
+      Node_getChild(oNNode, i + 1 , &two);
       cmp = Node_compare(one, two);
       if (cmp > 0){
          fprintf(stderr, "Children are not in lexicographic order.");
