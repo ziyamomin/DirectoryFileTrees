@@ -426,7 +426,13 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength) {
     /* ------------------ STEP 3: Traverse to parent of file ------------------ */
 
     for (i = 1; i < depth; i++) {
-        Path_T oPrefix = Path_prefix(oNewPath, i);
+Path_T oPrefix = NULL;  // Declare the output variable
+int status = Path_prefix(oNewPath, i, &oPrefix);  // Use &oPrefix to receive the result
+
+if (status != SUCCESS) {
+    Path_free(oNewPath);  // Clean up the input path
+    return MEMORY_ERROR;  // Or whatever error you're using
+}
         if (oPrefix == NULL) {
             Path_free(oNewPath);
             return MEMORY_ERROR;
