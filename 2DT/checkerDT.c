@@ -24,7 +24,7 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    /* Initializations needed for the lexicographic order thing */
    Node_T oNSecond;
    Node_T oNFirst;
-   size_t cmp;
+   int cmp;
 
    if(oNNode == NULL) {
       fprintf(stderr, "A node is a NULL pointer\n");
