@@ -93,4 +93,8 @@ size_t Path_getSharedPrefixDepth(Path_T oPPath1, Path_T oPPath2);
 */
 const char *Path_getComponent(Path_T oPPath, size_t ulLevel);
 
+/* Creates a Path_T from a string, returns NULL on failure */
+Path_T Path_create(const char *pcPath);
+
+
 #endif
