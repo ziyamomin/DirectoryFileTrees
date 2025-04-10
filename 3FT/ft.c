@@ -873,7 +873,13 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
     /* ------------------ STEP 2: Traverse tree to find the target file ------------------ */
 
     for (i = 1; i <= depth; i++) {
-        Path_T oPrefix = Path_prefix(oTargetPath, i);
+        Path_T oPrefix = NULL;
+        
+        if (Path_prefix(oTargetPath, i, &oPrefix) != SUCCESS) {
+            Path_free(oTargetPath);
+            return NULL;
+        }
+
         if (oPrefix == NULL) {
             Path_free(oTargetPath);
             return NULL;
