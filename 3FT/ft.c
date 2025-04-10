@@ -976,7 +976,7 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
 */
 int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     Path_T oTargetPath;
-    size_t depth, i;
+    size_t depth, i, j;
     Path_T tempPrefix;
 
     /* ------------------ STEP 1: Validate global state and input path ------------------ */
