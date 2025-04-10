@@ -1197,7 +1197,7 @@ char *FT_toString(void) {
     /* Build the result string */
     result[0] = '\0';
     for (size_t i = 0; i < numLines; i++) {
-        strcat(result, DynArray_get(oLines)[i]);
+        strcat(result, DynArray_get(oLines, i));
         strcat(result, "\n");
         free(DynArray_get(oLines)[i]);
     }
