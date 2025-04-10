@@ -1137,7 +1137,7 @@ static boolean FT_traverseToString(Node_T oNode, DynArray_T oLines) {
 
     /* Recursively process files first, then directories */
     for (size_t i = 0; i < DynArray_getLength(fileChildren); i++) {
-        Node_T child = DynArray_get(fileChildren)[i];
+        Node_T child = DynArray_get(fileChildren, i);
         if (!FT_traverseToString(child, oLines)) {
             DynArray_free(fileChildren);
             DynArray_free(dirChildren);
