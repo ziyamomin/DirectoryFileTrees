@@ -544,7 +544,7 @@ if (status != SUCCESS) {
 
     return SUCCESS;
 }
-
+}
 /*
   Returns TRUE if the FT contains a file with absolute path
   pcPath and FALSE if not or if there is an error while checking.
