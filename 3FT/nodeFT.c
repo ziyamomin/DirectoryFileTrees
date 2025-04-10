@@ -7,6 +7,7 @@
 #include "a4def.h"
 #include "path.h"
 #include "nodeFT.h"
+#include "dynarray.h"
 
 /* A Node_T is a pointer to a node in the File Tree. */
 struct node {
