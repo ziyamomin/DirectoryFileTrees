@@ -43,6 +43,7 @@ int FT_insertDir(const char *pcPath) {
     size_t depth;
     int result;
     size_t i;
+    size_t j;
 
     /* ------------------ STEP 1: Error Checking ------------------ */
 
@@ -90,8 +91,9 @@ int FT_insertDir(const char *pcPath) {
 
     /* Loop through each prefix of the path EXCEPT the last one */
     for (i = 1; i < depth; i++) {
+        int prefixStatus;
         Path_T oPrefix = NULL;
-        int prefixStatus = Path_prefix(oNewPath, i, &oPrefix);
+        prefixStatus = Path_prefix(oNewPath, i, &oPrefix);
         if (prefixStatus != SUCCESS) {
             Path_free(oNewPath);
             return MEMORY_ERROR;
@@ -107,7 +109,7 @@ int FT_insertDir(const char *pcPath) {
         size_t numChildren = Node_getNumChildren(oCurr);
         boolean found = FALSE;
 
-        for (size_t j = 0; j < numChildren; j++) {
+        for (j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
                 Path_comparePath(Node_getPath(child), oPrefix) == 0) {
@@ -139,7 +141,7 @@ int FT_insertDir(const char *pcPath) {
 
     /* Check if the current node already has a child at the final component */
     size_t numChildren = Node_getNumChildren(oCurr);
-    for (size_t j = 0; j < numChildren; j++) {
+    for (j = 0; j < numChildren; j++) {
         Node_T child;
         if (Node_getChild(oCurr, j, &child) == SUCCESS &&
             Path_comparePath(Node_getPath(child), oNewPath) == 0) {
@@ -180,7 +182,7 @@ boolean FT_containsDir(const char *pcPath) {
     Node_T oNext;
     size_t depth;
 
-    size_t i;
+    size_t i, j, numChildren;
 
     /* ------------------ STEP 1: Basic checks ------------------ */
 
@@ -212,8 +214,9 @@ boolean FT_containsDir(const char *pcPath) {
 
     /* Traverse from depth 1 up to full depth */
     for (i = 1; i <= depth; i++) {
+        int status;
         Path_T oPrefix = NULL;
-        int status = Path_prefix(oTargetPath, i, &oPrefix);
+        status = Path_prefix(oTargetPath, i, &oPrefix);
         
         if (status != SUCCESS) {
             Path_free(oTargetPath);
@@ -228,8 +231,8 @@ boolean FT_containsDir(const char *pcPath) {
         /* Assume not found unless we find a matching child */
         oNext = NULL;
 
-        size_t numChildren = Node_getNumChildren(oCurr);
-        for (size_t j = 0; j < numChildren; j++) {
+        numChildren = Node_getNumChildren(oCurr);
+        for (j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
                 Path_comparePath(Node_getPath(child), oPrefix) == 0) {
@@ -279,6 +282,9 @@ int FT_rmDir(const char *pcPath) {
     Node_T oParent = NULL;
     Node_T oToRemove = NULL;
     size_t depth, i;
+    size_t j;
+    size_t numChildren;
+
 
     /* ------------------ STEP 1: Basic validation ------------------ */
 
@@ -322,6 +328,7 @@ int FT_rmDir(const char *pcPath) {
     for (i = 1; i <= depth; i++) {
         Path_T oPrefix = NULL;
         int status = Path_prefix(oTargetPath, i, &oPrefix);
+        Node_T oNext = NULL;
         
         if (status != SUCCESS) {
             Path_free(oTargetPath);
@@ -333,10 +340,9 @@ int FT_rmDir(const char *pcPath) {
             return MEMORY_ERROR;
         }
 
-        Node_T oNext = NULL;
-        size_t numChildren = Node_getNumChildren(oCurr);
+        numChildren = Node_getNumChildren(oCurr);
 
-        for (size_t j = 0; j < numChildren; j++) {
+        for (j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
                 Path_comparePath(Node_getPath(child), oPrefix) == 0) {
@@ -368,8 +374,8 @@ int FT_rmDir(const char *pcPath) {
 
     /* ------------------ STEP 5: Remove node from parent's children ------------------ */
 
-    size_t numChildren = Node_getNumChildren(oParent);
-    for (size_t j = 0; j < numChildren; j++) {
+    numChildren = Node_getNumChildren(oParent);
+    for (j = 0; j < numChildren; j++) {
         Node_T child;
         if (Node_getChild(oParent, j, &child) == SUCCESS &&
             child == oToRemove) {
@@ -406,6 +412,9 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength) {
     Node_T oNext = NULL;
     size_t depth, i;
     int result;
+    size_t j;
+    size_t numChildren;
+    boolean found;
 
     /* ------------------ STEP 1: Initialization & validation ------------------ */
 
@@ -432,11 +441,12 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength) {
     /* ------------------ STEP 2: Handle first insertion (root must be a directory) ------------------ */
 
     if (oRoot == NULL) {
-Path_T rootPrefix = NULL;
-if (Path_prefix(oNewPath, 1, &rootPrefix) != SUCCESS) {
-    Path_free(oNewPath);
-    return MEMORY_ERROR;
-}
+        Path_T rootPrefix = NULL;
+        if (Path_prefix(oNewPath, 1, &rootPrefix) != SUCCESS) {
+            Path_free(oNewPath);
+            return MEMORY_ERROR;
+        }
+
         if (rootPrefix == NULL) {
             Path_free(oNewPath);
             return MEMORY_ERROR;
@@ -456,22 +466,23 @@ if (Path_prefix(oNewPath, 1, &rootPrefix) != SUCCESS) {
     /* ------------------ STEP 3: Traverse to parent of file ------------------ */
 
     for (i = 1; i < depth; i++) {
-Path_T oPrefix = NULL;
-int status = Path_prefix(oNewPath, i, &oPrefix);
+        Path_T oPrefix = NULL;
+        int status = Path_prefix(oNewPath, i, &oPrefix);
 
-if (status != SUCCESS) {
-    Path_free(oNewPath);
-    return MEMORY_ERROR;
-}
+        if (status != SUCCESS) {
+            Path_free(oNewPath);
+            return MEMORY_ERROR;
+        }
+
         if (oPrefix == NULL) {
             Path_free(oNewPath);
             return MEMORY_ERROR;
         }
 
-        boolean found = FALSE;
-        size_t numChildren = Node_getNumChildren(oCurr);
+        found = FALSE;
+        numChildren = Node_getNumChildren(oCurr);
 
-        for (size_t j = 0; j < numChildren; j++) {
+        for (j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
                 Path_comparePath(Node_getPath(child), oPrefix) == 0) {
@@ -499,8 +510,8 @@ if (status != SUCCESS) {
 
     /* ------------------ STEP 4: Check if file already exists ------------------ */
 
-    size_t numChildren = Node_getNumChildren(oCurr);
-    for (size_t j = 0; j < numChildren; j++) {
+    numChildren = Node_getNumChildren(oCurr);
+    for (j = 0; j < numChildren; j++) {
         Node_T child;
         if (Node_getChild(oCurr, j, &child) == SUCCESS &&
             Path_comparePath(Node_getPath(child), oNewPath) == 0) {
@@ -561,6 +572,8 @@ boolean FT_containsFile(const char *pcPath) {
     Node_T oCurr = oRoot;
     Node_T oNext = NULL;
     size_t depth, i;
+    size_t numChildren;
+    size_t j;
 
     /* ------------------ STEP 1: Validate state and input ------------------ */
 
@@ -604,9 +617,9 @@ boolean FT_containsFile(const char *pcPath) {
 
         /* Look for a child of oCurr with the matching path */
         boolean found = FALSE;
-        size_t numChildren = Node_getNumChildren(oCurr);
+        numChildren = Node_getNumChildren(oCurr);
 
-        for (size_t j = 0; j < numChildren; j++) {
+        for (j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
                 Path_comparePath(Node_getPath(child), oPrefix) == 0) {
@@ -653,7 +666,8 @@ int FT_rmFile(const char *pcPath) {
     Node_T oCurr = oRoot;
     Node_T oParent = NULL;
     Node_T oNext = NULL;
-    size_t depth, i;
+    size_t depth, i, j;
+    size_t numChildren;
 
     /* ------------------ STEP 1: Validate state and input ------------------ */
 
@@ -704,9 +718,9 @@ int FT_rmFile(const char *pcPath) {
         }
 
         boolean found = FALSE;
-        size_t numChildren = Node_getNumChildren(oCurr);
+        numChildren = Node_getNumChildren(oCurr);
 
-        for (size_t j = 0; j < numChildren; j++) {
+        for (j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
                 Path_comparePath(Node_getPath(child), oPrefix) == 0) {
@@ -739,8 +753,8 @@ int FT_rmFile(const char *pcPath) {
 
     /* ------------------ STEP 5: Remove from parent's children ------------------ */
 
-    size_t numChildren = Node_getNumChildren(oParent);
-    for (size_t j = 0; j < numChildren; j++) {
+    numChildren = Node_getNumChildren(oParent);
+    for (j = 0; j < numChildren; j++) {
         Node_T child;
         if (Node_getChild(oParent, j, &child) == SUCCESS &&
             child == oCurr) {
@@ -769,7 +783,8 @@ void *FT_getFileContents(const char *pcPath) {
     Path_T oTargetPath;
     Node_T oCurr = oRoot;
     Node_T oNext = NULL;
-    size_t depth, i;
+    size_t depth, i, j;
+    size_t numChildren;
 
     /* ------------------ STEP 1: Check initialization and path validity ------------------ */
 
@@ -806,9 +821,9 @@ void *FT_getFileContents(const char *pcPath) {
         }
 
         boolean found = FALSE;
-        size_t numChildren = Node_getNumChildren(oCurr);
+        numChildren = Node_getNumChildren(oCurr);
 
-        for (size_t j = 0; j < numChildren; j++) {
+        for (j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
                 Path_comparePath(Node_getPath(child), oPrefix) == 0) {
@@ -851,7 +866,7 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
     Path_T oTargetPath;
     Node_T oCurr = oRoot;
     Node_T oNext = NULL;
-    size_t depth, i;
+    size_t depth, i, j, numChildren;
 
     /* ------------------ STEP 1: Validate FT state and input path ------------------ */
 
@@ -889,9 +904,9 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
         }
 
         boolean found = FALSE;
-        size_t numChildren = Node_getNumChildren(oCurr);
+        numChildren = Node_getNumChildren(oCurr);
 
-        for (size_t j = 0; j < numChildren; j++) {
+        for (j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
                 Path_comparePath(Node_getPath(child), oPrefix) == 0) {
@@ -963,8 +978,7 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     Path_T oTargetPath;
     size_t depth;
     Path_T tempPrefix;
-
-    size_t i;
+    size_t j, numChildren;
 
     /* ------------------ STEP 1: Validate global state and input path ------------------ */
 
@@ -1012,9 +1026,9 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
         }
 
         boolean found = FALSE;
-        size_t numChildren = Node_getNumChildren(oCurr);
+        numChildren = Node_getNumChildren(oCurr);
 
-        for (size_t j = 0; j < numChildren; j++) {
+        for (j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
                 Path_comparePath(Node_getPath(child), oPrefix) == 0) {
@@ -1186,6 +1200,7 @@ static boolean FT_traverseToString(Node_T oNode, DynArray_T oLines) {
 }
 
 char *FT_toString(void) {
+    size_t totalLength, numLines;
     size_t i;
     if (!bIsInitialized || oRoot == NULL)
         return NULL;
@@ -1206,8 +1221,8 @@ char *FT_toString(void) {
     }
 
     /* Compute total length of final string (including newlines + null) */
-    size_t totalLength = 1;
-    size_t numLines = DynArray_getLength(oLines);
+    totalLength = 1;
+    numLines = DynArray_getLength(oLines);
     for (i = 0; i < numLines; i++) {
         char *line = DynArray_get(oLines, i);
         totalLength += strlen(line) + 1;
