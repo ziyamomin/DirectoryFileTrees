@@ -163,13 +163,12 @@ int FT_insertDir(const char *pcPath) {
 
     /* Add new node to current node’s children */
     if (Node_addChild(oCurr, oNewNode) != SUCCESS) {
-    {
         Node_free(oNewNode);
         return MEMORY_ERROR;
     }
 
     return SUCCESS;
-}
+
 }
 
 /*
