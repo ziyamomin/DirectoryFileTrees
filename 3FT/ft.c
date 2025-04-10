@@ -371,7 +371,7 @@ int FT_rmDir(const char *pcPath) {
         if (Node_getChild(oParent, j, &child) == SUCCESS &&
             child == oToRemove) {
             /* Remove child from array */
-            Node_removeChild(oParent, oToRemove);
+            Node_removeChild(oParent, oCurr);
             break;
         }
     }
@@ -742,7 +742,7 @@ int FT_rmFile(const char *pcPath) {
         if (Node_getChild(oParent, j, &child) == SUCCESS &&
             child == oCurr) {
             /* Remove it from the parent's children array */
-            Node_removeChild(oParent, oToRemove);
+            Node_removeChild(oParent, oCurr);
             break;
         }
     }
