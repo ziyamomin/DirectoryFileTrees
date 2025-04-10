@@ -40,7 +40,7 @@ int FT_insertDir(const char *pcPath) {
     Path_T oNewPath;
     Node_T oCurr = NULL;
     Node_T oNext = NULL;
-    size_t depth, i;
+    size_t depth;
     int result;
 
     /* ------------------ STEP 1: Error Checking ------------------ */
@@ -958,8 +958,6 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
 */
 int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     Path_T oTargetPath;
-    Node_T oCurr = oRoot;
-    Node_T oNext = NULL;
     size_t depth, i;
     Path_T tempPrefix;
 
@@ -998,7 +996,7 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     Path_free(tempPrefix);
     Path_free(oTargetPath);
     return CONFLICTING_PATH;
-}
+    }
 
     /* ------------------ STEP 3: Traverse to target node ------------------ */
 
