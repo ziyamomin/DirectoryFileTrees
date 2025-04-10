@@ -167,6 +167,7 @@ if (prefixStatus != SUCCESS) {
 
     return SUCCESS;
 }
+}
 
 /*
   Returns TRUE if the FT contains a directory with absolute path
