@@ -959,7 +959,7 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
 */
 int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     Path_T oTargetPath;
-    size_t depth, i;
+    size_t depth;
     Path_T tempPrefix;
 
 
@@ -1046,11 +1046,13 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
             }
         }
     } else {
-        if (pbIsFile != NULL) *pbIsFile = FALSE;
+        if (pbIsFile != NULL) {
+            *pbIsFile = FALSE;
+        }
+        return SUCCESS;
+
     }
 
-    return SUCCESS;
-}
 
 /*
   Sets the FT data structure to an initialized state.
