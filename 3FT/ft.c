@@ -159,7 +159,8 @@ if (prefixStatus != SUCCESS) {
     }
 
     /* Add new node to current node’s children */
-    if (DynArray_add(oCurr->oChildren, oNewNode) == FALSE) {
+    if (Node_addChild(oCurr, oNewNode) != SUCCESS) {
+    {
         Node_free(oNewNode);
         return MEMORY_ERROR;
     }
@@ -520,7 +521,8 @@ if (status != SUCCESS) {
 
     /* ------------------ STEP 7: Add new file node to parent ------------------ */
 
-    if (!DynArray_add(oCurr->oChildren, oNewNode)) {
+    if (Node_addChild(oCurr, oNewNode) != SUCCESS) {
+    {
         Node_free(oNewNode);
         return MEMORY_ERROR;
     }
