@@ -973,7 +973,7 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
 */
 int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     Path_T oTargetPath;
-    size_t depth, i, j;
+    size_t depth, i, j, numChildren;
     Path_T tempPrefix;
     Node_T oNext;
 
