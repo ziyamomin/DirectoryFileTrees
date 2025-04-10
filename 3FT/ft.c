@@ -20,9 +20,6 @@
 #include <string.h>
 
 
-/* Forward declaration since path.h doesn't expose it */
-int Node_compare(Path_T oPPath1, Path_T oPPath2);
-
 
 static boolean bIsInitialized = FALSE;   /* Indicates if FT is initialized */
 static Node_T oRoot = NULL;              /* The root node of the File Tree */
