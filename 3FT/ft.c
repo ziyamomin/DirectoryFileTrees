@@ -987,10 +987,18 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     /* ------------------ STEP 2: Handle potential conflict at root ------------------ */
 
     Path_T rootPath = Node_getPath(oRoot);
-    if (Path_prefix(rootPath, 1, &tempPrefix) != SUCCESS || !Path_prefix(rootPath, oTargetPath)) {
-        Path_free(oTargetPath);
-        return CONFLICTING_PATH;
-    }
+    Path_T tempPrefix = NULL;
+    if (Path_prefix(oTargetPath, 1, &tempPrefix) != SUCCESS ||
+        Path_comparePath(tempPrefix, rootPath) != 0) {
+            Path_free(tempPrefix);
+            Path_free(oTargetPath);
+            return CONFLICTING_PATH;
+        }
+    
+    Path_free(tempPrefix);
+    Path_free(oTargetPath);
+    return CONFLICTING_PATH;
+}
 
     /* ------------------ STEP 3: Traverse to target node ------------------ */
 
