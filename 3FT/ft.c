@@ -52,7 +52,7 @@ int FT_insertDir(const char *pcPath) {
     /* Attempt to create a Path_T object from the string */
     oNewPath = Path_create(pcPath);
     if (oNewPath == NULL)
-        return BAD_PATH;  // Path was malformed or NULL
+        return BAD_PATH;
 
     /* Get the depth of the new path (how many components like a/b/c = 3) */
     depth = Path_getDepth(oNewPath);
@@ -69,18 +69,18 @@ int FT_insertDir(const char *pcPath) {
         /* If this is the very first insertion, path must be depth 1 */
         if (depth != 1) {
             Path_free(oNewPath);
-            return CONFLICTING_PATH; // Root doesn't exist yet, but path isn't direct root
+            return CONFLICTING_PATH;
         }
 
         /* Create the root node (parent is NULL, type is directory) */
         result = Node_new(oNewPath, NULL, FT_DIR, &oRoot);
-        Path_free(oNewPath); // Path copied into node, we can free this one
+        Path_free(oNewPath);
 
         if (result != SUCCESS) {
-            return result; // Could be MEMORY_ERROR or similar
+            return result;
         }
 
-        return SUCCESS; // Root successfully inserted
+        return SUCCESS;
     }
 
     /* ------------------ STEP 3: Traverse the path one level at a time ------------------ */
@@ -89,7 +89,7 @@ int FT_insertDir(const char *pcPath) {
 
     /* Loop through each prefix of the path EXCEPT the last one */
     for (i = 1; i < depth; i++) {
-        Path_T oPrefix = NULL; // will hold the result
+        Path_T oPrefix = NULL;
         int prefixStatus = Path_prefix(oNewPath, i, &oPrefix);
         if (prefixStatus != SUCCESS) {
             Path_free(oNewPath);
@@ -143,7 +143,7 @@ int FT_insertDir(const char *pcPath) {
         if (Node_getChild(oCurr, j, &child) == SUCCESS &&
             Path_comparePath(Node_getPath(child), oNewPath) == 0) {
             Path_free(oNewPath);
-            return ALREADY_IN_TREE;  // Already exists as dir or file
+            return ALREADY_IN_TREE;
         }
     }
 
@@ -152,10 +152,10 @@ int FT_insertDir(const char *pcPath) {
     Node_T oNewNode;
     result = Node_new(oNewPath, oCurr, FT_DIR, &oNewNode);
 
-    Path_free(oNewPath);  // Done with the path object
+    Path_free(oNewPath);
 
     if (result != SUCCESS) {
-        return result;  // Propagate error (e.g. MEMORY_ERROR)
+        return result;
     }
 
     /* Add new node to current node’s children */
@@ -255,7 +255,7 @@ boolean FT_containsDir(const char *pcPath) {
     if (Node_getType(oCurr) == FT_DIR) {
         return TRUE;
     } else {
-        return FALSE;  // It's a file, not a directory
+        return FALSE;
     }
 }
 
@@ -349,7 +349,7 @@ int FT_rmDir(const char *pcPath) {
             return NO_SUCH_PATH;
         }
 
-        oParent = oCurr;  // Save parent before moving deeper
+        oParent = oCurr;
         oCurr = oNext;
     }
 
@@ -449,12 +449,12 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength) {
     /* ------------------ STEP 3: Traverse to parent of file ------------------ */
 
     for (i = 1; i < depth; i++) {
-Path_T oPrefix = NULL;  // Declare the output variable
-int status = Path_prefix(oNewPath, i, &oPrefix);  // Use &oPrefix to receive the result
+Path_T oPrefix = NULL;
+int status = Path_prefix(oNewPath, i, &oPrefix);
 
 if (status != SUCCESS) {
-    Path_free(oNewPath);  // Clean up the input path
-    return MEMORY_ERROR;  // Or whatever error you're using
+    Path_free(oNewPath);
+    return MEMORY_ERROR;
 }
         if (oPrefix == NULL) {
             Path_free(oNewPath);
@@ -478,7 +478,7 @@ if (status != SUCCESS) {
 
         if (!found) {
             Path_free(oNewPath);
-            return CONFLICTING_PATH; // A prefix does not exist
+            return CONFLICTING_PATH;
         }
 
         /* Check that intermediate path is a directory */
@@ -487,7 +487,7 @@ if (status != SUCCESS) {
             return NOT_A_DIRECTORY;
         }
 
-        oCurr = oNext; // Move down one level
+        oCurr = oNext;
     }
 
     /* ------------------ STEP 4: Check if file already exists ------------------ */
@@ -506,7 +506,7 @@ if (status != SUCCESS) {
 
     Node_T oNewNode;
     result = Node_new(oNewPath, oCurr, FT_FILE, &oNewNode);
-    Path_free(oNewPath);  // Done with path
+    Path_free(oNewPath);
 
     if (result != SUCCESS) {
         return result;
@@ -529,10 +529,10 @@ if (status != SUCCESS) {
             return MEMORY_ERROR;
         }
     } else {
-        Node_setContents(oNewNode, NULL);  // Treat as empty
+        Node_setContents(oNewNode, NULL);
     }
 
-    free(copy);  // We copied the contents into the node, safe to free
+    free(copy);
 
     /* ------------------ STEP 7: Add new file node to parent ------------------ */
 
@@ -616,7 +616,7 @@ boolean FT_containsFile(const char *pcPath) {
             return FALSE;
         }
 
-        oCurr = oNext;  // move down to the matched node
+        oCurr = oNext;
     }
 
     /* ------------------ STEP 3: Confirm that the final node is a file ------------------ */
@@ -677,7 +677,7 @@ int FT_rmFile(const char *pcPath) {
             return NOT_A_FILE;
         } else {
             Path_free(oTargetPath);
-            return CONFLICTING_PATH;  // It's the root dir, not allowed to remove via FT_rmFile
+            return CONFLICTING_PATH;
         }
     }
 
@@ -815,10 +815,10 @@ void *FT_getFileContents(const char *pcPath) {
 
         if (!found) {
             Path_free(oTargetPath);
-            return NULL;  // One of the prefixes not found
+            return NULL;
         }
 
-        oCurr = oNext;  // Move deeper
+        oCurr = oNext;
     }
 
     Path_free(oTargetPath);
@@ -912,14 +912,14 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
     if (ulNewLength > 0 && pvNewContents != NULL) {
         newContents = malloc(ulNewLength);
         if (newContents == NULL) {
-            return NULL;  // Allocation failed
+            return NULL;
         }
         memcpy(newContents, pvNewContents, ulNewLength);
     }
 
     /* ------------------ STEP 5: Replace contents and return old contents ------------------ */
 
-    void *oldContents = (void *)Node_getContents(oCurr);  // Save old pointer
+    void *oldContents = (void *)Node_getContents(oCurr);
 
     if (!Node_setContents(oCurr, newContents)) {
         /* Failed to set — free new content buffer and fail safely */
@@ -927,7 +927,7 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
         return NULL;
     }
 
-    return oldContents;  // Caller is responsible for freeing this if needed
+    return oldContents;
 }
 
 /*
@@ -1009,7 +1009,7 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
             return NO_SUCH_PATH;
         }
 
-        oCurr = oNext;  // Move deeper
+        oCurr = oNext;
     }
 
     Path_free(oTargetPath);
@@ -1028,7 +1028,6 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
         }
     } else {
         if (pbIsFile != NULL) *pbIsFile = FALSE;
-        // *pulSize remains unchanged
     }
 
     return SUCCESS;
@@ -1180,11 +1179,11 @@ char *FT_toString(void) {
     }
 
     /* Compute total length of final string (including newlines + null) */
-    size_t totalLength = 1; // for '\0'
+    size_t totalLength = 1;
     size_t numLines = DynArray_getLength(oLines);
     for (size_t i = 0; i < numLines; i++) {
         char *line = DynArray_get(oLines)[i];
-        totalLength += strlen(line) + 1; // +1 for newline
+        totalLength += strlen(line) + 1;
     }
 
     char *result = malloc(totalLength);
@@ -1200,7 +1199,7 @@ char *FT_toString(void) {
     for (size_t i = 0; i < numLines; i++) {
         strcat(result, DynArray_get(oLines)[i]);
         strcat(result, "\n");
-        free(DynArray_get(oLines)[i]);  // Clean up individual lines
+        free(DynArray_get(oLines)[i]);
     }
 
     DynArray_free(oLines);
