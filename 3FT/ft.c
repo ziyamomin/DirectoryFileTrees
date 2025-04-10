@@ -42,6 +42,7 @@ int FT_insertDir(const char *pcPath) {
     Node_T oNext = NULL;
     size_t depth;
     int result;
+    size_T i;
 
     /* ------------------ STEP 1: Error Checking ------------------ */
 
