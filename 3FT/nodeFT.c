@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include "a4def.h"
 #include "path.h"
+#include "nodeFT.h"
 
 /* A Node_T is a pointer to a node in the File Tree. */
 struct node {
