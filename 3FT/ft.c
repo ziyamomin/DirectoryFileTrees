@@ -1146,7 +1146,7 @@ static boolean FT_traverseToString(Node_T oNode, DynArray_T oLines) {
     }
 
     for (size_t i = 0; i < DynArray_getLength(dirChildren); i++) {
-        Node_T child = DynArray_get(dirChildren)[i];
+        Node_T child = DynArray_get(dirChildren, i);
         if (!FT_traverseToString(child, oLines)) {
             DynArray_free(fileChildren);
             DynArray_free(dirChildren);
