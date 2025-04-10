@@ -180,6 +180,8 @@ boolean FT_containsDir(const char *pcPath) {
     Node_T oNext;
     size_t depth;
 
+    size_t i;
+
     /* ------------------ STEP 1: Basic checks ------------------ */
 
     /* FT must be initialized */
