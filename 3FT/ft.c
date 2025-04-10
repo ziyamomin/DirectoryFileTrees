@@ -1120,6 +1120,8 @@ static int compareNodes(const void *p1, const void *p2) {
 /* Helper: recursively builds string representation (depth-first traversal) */
 static boolean FT_traverseToString(Node_T oNode, DynArray_T oLines) {
     char *s = Node_toString(oNode);
+    size_t i; 
+
     if (s == NULL) return FALSE;
 
     if (!DynArray_add(oLines, s)) {
@@ -1138,7 +1140,7 @@ static boolean FT_traverseToString(Node_T oNode, DynArray_T oLines) {
         return FALSE;
     }
 
-    for (size_t i = 0; i < numChildren; i++) {
+    for (i = 0; i < numChildren; i++) {
         Node_T child;
         if (Node_getChild(oNode, i, &child) == SUCCESS) {
             if (Node_getType(child) == FT_FILE) {
@@ -1157,7 +1159,7 @@ static boolean FT_traverseToString(Node_T oNode, DynArray_T oLines) {
           sizeof(Node_T), compareNodes);
 
     /* Recursively process files first, then directories */
-    for (size_t i = 0; i < DynArray_getLength(fileChildren); i++) {
+    for (i = 0; i < DynArray_getLength(fileChildren); i++) {
         Node_T child = DynArray_get(fileChildren, i);
         if (!FT_traverseToString(child, oLines)) {
             DynArray_free(fileChildren);
@@ -1166,7 +1168,7 @@ static boolean FT_traverseToString(Node_T oNode, DynArray_T oLines) {
         }
     }
 
-    for (size_t i = 0; i < DynArray_getLength(dirChildren); i++) {
+    for (i = 0; i < DynArray_getLength(dirChildren); i++) {
         Node_T child = DynArray_get(dirChildren, i);
         if (!FT_traverseToString(child, oLines)) {
             DynArray_free(fileChildren);
@@ -1181,6 +1183,7 @@ static boolean FT_traverseToString(Node_T oNode, DynArray_T oLines) {
 }
 
 char *FT_toString(void) {
+    size_t i;
     if (!bIsInitialized || oRoot == NULL)
         return NULL;
 
@@ -1191,7 +1194,7 @@ char *FT_toString(void) {
     if (!FT_traverseToString(oRoot, oLines)) {
         /* Error occurred — cleanup */
         size_t len = DynArray_getLength(oLines);
-        for (size_t i = 0; i < len; i++) {
+        for (i = 0; i < len; i++) {
             char *line = DynArray_get(oLines, i);
             free(line);
         }
@@ -1202,14 +1205,14 @@ char *FT_toString(void) {
     /* Compute total length of final string (including newlines + null) */
     size_t totalLength = 1;
     size_t numLines = DynArray_getLength(oLines);
-    for (size_t i = 0; i < numLines; i++) {
+    for (i = 0; i < numLines; i++) {
         char *line = DynArray_get(oLines, i);
         totalLength += strlen(line) + 1;
     }
 
     char *result = malloc(totalLength);
     if (result == NULL) {
-        for (size_t i = 0; i < numLines; i++)
+        for (i = 0; i < numLines; i++)
             free(DynArray_get(oLines, i));
         DynArray_free(oLines);
         return NULL;
@@ -1217,7 +1220,7 @@ char *FT_toString(void) {
 
     /* Build the result string */
     result[0] = '\0';
-    for (size_t i = 0; i < numLines; i++) {
+    for (i = 0; i < numLines; i++) {
         strcat(result, DynArray_get(oLines, i));
         strcat(result, "\n");
         free(DynArray_get(oLines, i));
