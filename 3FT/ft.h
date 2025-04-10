@@ -151,4 +151,7 @@ char *FT_toString(void);
 
 int Node_addChild(Node_T oParent, Node_T oChild);
 
+int Node_removeChild(Node_T oParent, Node_T oChild);
+
+
 #endif

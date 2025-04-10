@@ -259,6 +259,19 @@ boolean FT_containsDir(const char *pcPath) {
     }
 }
 
+int Node_removeChild(Node_T oParent, Node_T oChild) {
+    size_t numChildren = DynArray_getLength(oParent->oChildren);
+    for (size_t i = 0; i < numChildren; i++) {
+        Node_T child = DynArray_get(oParent->oChildren, i);
+        if (child == oChild) {
+            DynArray_removeAt(oParent->oChildren, i);
+            return SUCCESS;
+        }
+    }
+    return NO_SUCH_PATH;
+}
+
+
 /*
   Removes the FT hierarchy (subtree) at the directory with absolute
   path pcPath. Returns SUCCESS if found and removed.
@@ -371,7 +384,7 @@ int FT_rmDir(const char *pcPath) {
         if (Node_getChild(oParent, j, &child) == SUCCESS &&
             child == oToRemove) {
             /* Remove child from array */
-            DynArray_removeAt(oParent->oChildren, j);
+            Node_removeChild(oParent, oToRemove);
             break;
         }
     }
@@ -429,7 +442,11 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength) {
     /* ------------------ STEP 2: Handle first insertion (root must be a directory) ------------------ */
 
     if (oRoot == NULL) {
-        Path_T rootPrefix = Path_prefix(oNewPath, 1);
+Path_T rootPrefix = NULL;
+if (Path_prefix(oNewPath, 1, &rootPrefix) != SUCCESS) {
+    Path_free(oNewPath);
+    return MEMORY_ERROR;
+}
         if (rootPrefix == NULL) {
             Path_free(oNewPath);
             return MEMORY_ERROR;
@@ -738,7 +755,7 @@ int FT_rmFile(const char *pcPath) {
         if (Node_getChild(oParent, j, &child) == SUCCESS &&
             child == oCurr) {
             /* Remove it from the parent's children array */
-            DynArray_removeAt(oParent->oChildren, j);
+            Node_removeChild(oParent, oToRemove);
             break;
         }
     }
