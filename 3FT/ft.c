@@ -964,6 +964,7 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     size_t depth;
     Path_T tempPrefix;
 
+    size_t i;
 
     /* ------------------ STEP 1: Validate global state and input path ------------------ */
 
