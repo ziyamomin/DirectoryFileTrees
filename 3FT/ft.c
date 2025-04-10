@@ -554,13 +554,11 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength) {
     /* ------------------ STEP 7: Add new file node to parent ------------------ */
 
     if (Node_addChild(oCurr, oNewNode) != SUCCESS) {
-    {
         Node_free(oNewNode);
         return MEMORY_ERROR;
     }
 
     return SUCCESS;
-}
 }
 /*
   Returns TRUE if the FT contains a file with absolute path
