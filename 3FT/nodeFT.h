@@ -92,4 +92,7 @@ int Node_setContents(Node_T oNNode, const char *pcContents);
 */
 const char *Node_getContents(Node_T oNNode);
 
+int Node_removeChild(Node_T oParent, Node_T oChild);
+
 #endif
+

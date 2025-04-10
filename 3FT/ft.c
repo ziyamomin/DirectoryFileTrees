@@ -264,7 +264,7 @@ int Node_removeChild(Node_T oParent, Node_T oChild) {
     for (size_t i = 0; i < numChildren; i++) {
         Node_T child = DynArray_get(oParent->oChildren, i);
         if (child == oChild) {
-            DynArray_removeAt(oParent->oChildren, i);
+            Node_removeChild(oParent, oToRemove);
             return SUCCESS;
         }
     }
