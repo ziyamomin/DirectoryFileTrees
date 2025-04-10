@@ -89,12 +89,12 @@ int FT_insertDir(const char *pcPath) {
 
     /* Loop through each prefix of the path EXCEPT the last one */
     for (i = 1; i < depth; i++) {
-Path_T oPrefix = NULL; // will hold the result
-int prefixStatus = Path_prefix(oNewPath, i, &oPrefix);
-if (prefixStatus != SUCCESS) {
-    Path_free(oNewPath);
-    return MEMORY_ERROR;
-}
+        Path_T oPrefix = NULL; // will hold the result
+        int prefixStatus = Path_prefix(oNewPath, i, &oPrefix);
+        if (prefixStatus != SUCCESS) {
+            Path_free(oNewPath);
+            return MEMORY_ERROR;
+        }
 
         /* Ensure we successfully created the prefix */
         if (oPrefix == NULL) {
@@ -209,7 +209,14 @@ boolean FT_containsDir(const char *pcPath) {
 
     /* Traverse from depth 1 up to full depth */
     for (i = 1; i <= depth; i++) {
-        Path_T oPrefix = Path_prefix(oTargetPath, i);
+        Path_T oPrefix = NULL;
+        int status = Path_prefix(oTargetPath, i, &oPrefix);
+        
+        if (status != SUCCESS) {
+            Path_free(oTargetPath);
+            return FALSE;
+        }
+        
         if (oPrefix == NULL) {
             Path_free(oTargetPath);
             return FALSE;
@@ -310,7 +317,14 @@ int FT_rmDir(const char *pcPath) {
     /* ------------------ STEP 3: Traverse to the target node ------------------ */
 
     for (i = 1; i <= depth; i++) {
-        Path_T oPrefix = Path_prefix(oTargetPath, i);
+        Path_T oPrefix = NULL;
+        int status = Path_prefix(oTargetPath, i, &oPrefix);
+        
+        if (status != SUCCESS) {
+            Path_free(oTargetPath);
+            return FALSE;
+        }
+        
         if (oPrefix == NULL) {
             Path_free(oTargetPath);
             return MEMORY_ERROR;
@@ -568,7 +582,14 @@ boolean FT_containsFile(const char *pcPath) {
 
     for (i = 1; i <= depth; i++) {
         /* Get the prefix of the path at this level */
-        Path_T oPrefix = Path_prefix(oTargetPath, i);
+        Path_T oPrefix = NULL;
+        int status = Path_prefix(oTargetPath, i, &oPrefix);
+        
+        if (status != SUCCESS) {
+            Path_free(oTargetPath);
+            return FALSE;
+        }
+        
         if (oPrefix == NULL) {
             Path_free(oTargetPath);
             return FALSE;
@@ -663,7 +684,13 @@ int FT_rmFile(const char *pcPath) {
     /* ------------------ STEP 3: Traverse path to locate file ------------------ */
 
     for (i = 1; i <= depth; i++) {
-        Path_T oPrefix = Path_prefix(oTargetPath, i);
+        Path_T oPrefix = NULL;
+        int status = Path_prefix(oTargetPath, i, &oPrefix);
+        if (status != SUCCESS) {
+            Path_free(oTargetPath);
+            return FALSE;
+        }
+
         if (oPrefix == NULL) {
             Path_free(oTargetPath);
             return MEMORY_ERROR;
@@ -760,7 +787,12 @@ void *FT_getFileContents(const char *pcPath) {
     /* ------------------ STEP 2: Traverse the path to find the target node ------------------ */
 
     for (i = 1; i <= depth; i++) {
-        Path_T oPrefix = Path_prefix(oTargetPath, i);
+        Path_T oPrefix = NULL;
+        int status = Path_prefix(oTargetPath, i, &oPrefix);
+        if (status != SUCCESS) {
+            Path_free(oTargetPath);
+            return FALSE;
+        }
         if (oPrefix == NULL) {
             Path_free(oTargetPath);
             return NULL;
