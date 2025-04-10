@@ -1013,7 +1013,7 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     Path_free(tempPrefix);
     Path_free(oTargetPath);
     return CONFLICTING_PATH;
-    }
+
 
     /* ------------------ STEP 3: Traverse to target node ------------------ */
 
@@ -1068,7 +1068,7 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
         return SUCCESS;
 
     }
-
+}
 
 /*
   Sets the FT data structure to an initialized state.
