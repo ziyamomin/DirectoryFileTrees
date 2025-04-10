@@ -1166,10 +1166,10 @@ static boolean FT_traverseToString(Node_T oNode, DynArray_T oLines) {
     }
 
     /* Sort each list lexicographically */
-    qsort(DynArray_get(fileChildren), DynArray_getLength(fileChildren),
+    qsort(fileChildren, DynArray_getLength(fileChildren),
           sizeof(Node_T), compareNodes);
 
-    qsort(DynArray_get(dirChildren), DynArray_getLength(dirChildren),
+    qsort(dirChildren, DynArray_getLength(dirChildren),
           sizeof(Node_T), compareNodes);
 
     /* Recursively process files first, then directories */
