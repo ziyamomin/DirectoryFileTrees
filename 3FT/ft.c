@@ -259,22 +259,6 @@ boolean FT_containsDir(const char *pcPath) {
     }
 }
 
-int Node_removeChild(Node_T oParent, Node_T oChild) {
-    assert(oParent != NULL && oChild != NULL);
-
-    size_t numChildren = DynArray_getLength(oParent->oChildren);  // ✅ fixed
-    for (size_t i = 0; i < numChildren; i++) {
-        Node_T child = DynArray_get(oParent->oChildren, i);
-        if (child == oChild) {
-            DynArray_removeAt(oParent->oChildren, i);
-            return SUCCESS;
-        }
-    }
-
-    return NO_SUCH_PATH;
-}
-
-
 /*
   Removes the FT hierarchy (subtree) at the directory with absolute
   path pcPath. Returns SUCCESS if found and removed.
