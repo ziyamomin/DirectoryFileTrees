@@ -1171,7 +1171,7 @@ char *FT_toString(void) {
         /* Error occurred — cleanup */
         size_t len = DynArray_getLength(oLines);
         for (size_t i = 0; i < len; i++) {
-            char *line = DynArray_get(oLines)[i];
+            char *line = DynArray_get(oLines, i);
             free(line);
         }
         DynArray_free(oLines);
@@ -1182,14 +1182,14 @@ char *FT_toString(void) {
     size_t totalLength = 1;
     size_t numLines = DynArray_getLength(oLines);
     for (size_t i = 0; i < numLines; i++) {
-        char *line = DynArray_get(oLines)[i];
+        char *line = DynArray_get(oLines, i);
         totalLength += strlen(line) + 1;
     }
 
     char *result = malloc(totalLength);
     if (result == NULL) {
         for (size_t i = 0; i < numLines; i++)
-            free(DynArray_get(oLines)[i]);
+            free(DynArray_get(oLines, i));
         DynArray_free(oLines);
         return NULL;
     }
@@ -1199,7 +1199,7 @@ char *FT_toString(void) {
     for (size_t i = 0; i < numLines; i++) {
         strcat(result, DynArray_get(oLines, i));
         strcat(result, "\n");
-        free(DynArray_get(oLines)[i]);
+        free(DynArray_get(oLines, i));
     }
 
     DynArray_free(oLines);
