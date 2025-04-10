@@ -149,4 +149,6 @@ int FT_destroy(void);
 */
 char *FT_toString(void);
 
+int Node_addChild(Node_T oParent, Node_T oChild);
+
 #endif

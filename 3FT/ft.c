@@ -19,9 +19,6 @@
 #include "ft.h"
 #include <string.h>
 
-/* Forward declaration since path.h doesn't expose it */
-int Path_compare(Path_T oPPath1, Path_T oPPath2);
-
 static boolean bIsInitialized = FALSE;   /* Indicates if FT is initialized */
 static Node_T oRoot = NULL;              /* The root node of the File Tree */
 
@@ -109,7 +106,7 @@ if (prefixStatus != SUCCESS) {
         for (size_t j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-                Path_compare(Node_getPath(child), oPrefix) == 0) {
+                Node_compare(Node_getPath(child), oPrefix) == 0) {
                 oNext = child;
                 found = TRUE;
                 break;
@@ -141,7 +138,7 @@ if (prefixStatus != SUCCESS) {
     for (size_t j = 0; j < numChildren; j++) {
         Node_T child;
         if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-            Path_compare(Node_getPath(child), oNewPath) == 0) {
+            Node_compare(Node_getPath(child), oNewPath) == 0) {
             Path_free(oNewPath);
             return ALREADY_IN_TREE;  // Already exists as dir or file
         }
@@ -159,7 +156,7 @@ if (prefixStatus != SUCCESS) {
     }
 
     /* Add new node to current node’s children */
-    if (DynArray_add(oCurr->oChildren, oNewNode) == FALSE) {
+    if (Node_addChild(oCurr, oNewNode) != SUCCESS) {
         Node_free(oNewNode);
         return MEMORY_ERROR;
     }
@@ -207,11 +204,11 @@ boolean FT_containsDir(const char *pcPath) {
 
     /* Traverse from depth 1 up to full depth */
     for (i = 1; i <= depth; i++) {
-        Path_T oPrefix = Path_prefix(oTargetPath, i);
-        if (oPrefix == NULL) {
+        Path_T oPrefix = NULL;
+        if (Path_prefix(oTargetPath, i, &oPrefix) != SUCCESS) {
             Path_free(oTargetPath);
             return FALSE;
-        }
+    }
 
         /* Assume not found unless we find a matching child */
         oNext = NULL;
@@ -220,7 +217,7 @@ boolean FT_containsDir(const char *pcPath) {
         for (size_t j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-                Path_compare(Node_getPath(child), oPrefix) == 0) {
+                Node_compare(Node_getPath(child), oPrefix) == 0) {
                 oNext = child;
                 break;
             }
@@ -291,7 +288,7 @@ int FT_rmDir(const char *pcPath) {
     /* ------------------ STEP 2: Special case – root deletion ------------------ */
 
     /* If we're deleting the root, it must match root's path exactly */
-    if (Path_compare(Node_getPath(oRoot), oTargetPath) == 0) {
+    if (Node_compare(Node_getPath(oRoot), oTargetPath) == 0) {
         if (Node_getType(oRoot) != FT_DIR) {
             Path_free(oTargetPath);
             return NOT_A_DIRECTORY;
@@ -308,19 +305,20 @@ int FT_rmDir(const char *pcPath) {
     /* ------------------ STEP 3: Traverse to the target node ------------------ */
 
     for (i = 1; i <= depth; i++) {
-        Path_T oPrefix = Path_prefix(oTargetPath, i);
-        if (oPrefix == NULL) {
-            Path_free(oTargetPath);
-            return MEMORY_ERROR;
-        }
+        Path_T oPrefix = NULL;
+        int status = Path_prefix(oTargetPath, i, &oPrefix);
+        if (status != SUCCESS) {
+            Path_free(oTargetPath);  // Clean up if necessary
+            return MEMORY_ERROR;     // Or return FALSE, depending on context
+    }
 
-        Node_T oNext = NULL;
-        size_t numChildren = Node_getNumChildren(oCurr);
+    Node_T oNext = NULL;
+    size_t numChildren = Node_getNumChildren(oCurr);
 
-        for (size_t j = 0; j < numChildren; j++) {
-            Node_T child;
-            if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-                Path_compare(Node_getPath(child), oPrefix) == 0) {
+    for (size_t j = 0; j < numChildren; j++) {
+        Node_T child;
+        if (Node_getChild(oCurr, j, &child) == SUCCESS &&
+            Node_compare(Node_getPath(child), oPrefix) == 0) {
                 oNext = child;
                 break;
             }
@@ -451,7 +449,7 @@ if (status != SUCCESS) {
         for (size_t j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-                Path_compare(Node_getPath(child), oPrefix) == 0) {
+                Node_compare(Node_getPath(child), oPrefix) == 0) {
                 oNext = child;
                 found = TRUE;
                 break;
@@ -480,7 +478,7 @@ if (status != SUCCESS) {
     for (size_t j = 0; j < numChildren; j++) {
         Node_T child;
         if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-            Path_compare(Node_getPath(child), oNewPath) == 0) {
+            Node_compare(Node_getPath(child), oNewPath) == 0) {
             Path_free(oNewPath);
             return ALREADY_IN_TREE;
         }
@@ -578,7 +576,7 @@ boolean FT_containsFile(const char *pcPath) {
         for (size_t j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-                Path_compare(Node_getPath(child), oPrefix) == 0) {
+                Node_compare(Node_getPath(child), oPrefix) == 0) {
                 oNext = child;
                 found = TRUE;
                 break;
@@ -646,7 +644,7 @@ int FT_rmFile(const char *pcPath) {
 
     /* ------------------ STEP 2: Cannot delete root as a file ------------------ */
 
-    if (Path_compare(Node_getPath(oRoot), oTargetPath) == 0) {
+    if (Node_compare(Node_getPath(oRoot), oTargetPath) == 0) {
         /* Root exists — check if it's a file (invalid) or directory */
         if (Node_getType(oRoot) == FT_FILE) {
             Path_free(oTargetPath);
@@ -672,7 +670,7 @@ int FT_rmFile(const char *pcPath) {
         for (size_t j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-                Path_compare(Node_getPath(child), oPrefix) == 0) {
+                Node_compare(Node_getPath(child), oPrefix) == 0) {
                 oNext = child;
                 found = TRUE;
                 break;
@@ -769,7 +767,7 @@ void *FT_getFileContents(const char *pcPath) {
         for (size_t j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-                Path_compare(Node_getPath(child), oPrefix) == 0) {
+                Node_compare(Node_getPath(child), oPrefix) == 0) {
                 oNext = child;
                 found = TRUE;
                 break;
@@ -846,7 +844,7 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
         for (size_t j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-                Path_compare(Node_getPath(child), oPrefix) == 0) {
+                Node_compare(Node_getPath(child), oPrefix) == 0) {
                 oNext = child;
                 found = TRUE;
                 break;
@@ -960,7 +958,7 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
         for (size_t j = 0; j < numChildren; j++) {
             Node_T child;
             if (Node_getChild(oCurr, j, &child) == SUCCESS &&
-                Path_compare(Node_getPath(child), oPrefix) == 0) {
+                Node_compare(Node_getPath(child), oPrefix) == 0) {
                 oNext = child;
                 found = TRUE;
                 break;
@@ -1170,4 +1168,11 @@ char *FT_toString(void) {
 
     DynArray_free(oLines);
     return result;
+}
+
+int Node_addChild(Node_T oParent, Node_T oChild) {
+    if (DynArray_add(oParent->oChildren, oChild) == FALSE) {
+        return MEMORY_ERROR;
+    }
+    return SUCCESS;
 }
