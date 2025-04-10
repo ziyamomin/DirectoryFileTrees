@@ -178,7 +178,7 @@ boolean FT_containsDir(const char *pcPath) {
     Path_T oTargetPath;
     Node_T oCurr;
     Node_T oNext;
-    size_t depth, i;
+    size_t depth;
 
     /* ------------------ STEP 1: Basic checks ------------------ */
 
