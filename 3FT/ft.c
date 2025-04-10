@@ -260,7 +260,7 @@ boolean FT_containsDir(const char *pcPath) {
 }
 
 int Node_removeChild(Node_T oParent, Node_T oChild) {
-    size_t numChildren = DynArray_getLength(oParent->oChildren);
+    DynArray_getLength(oParent, oChild);
     for (size_t i = 0; i < numChildren; i++) {
         Node_T child = DynArray_get(oParent->oChildren, i);
         if (child == oChild) {
