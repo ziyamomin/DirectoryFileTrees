@@ -974,7 +974,7 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
 int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     Path_T oTargetPath;
     size_t depth, i, j, numChildren;
-    Path_T tempPrefix;
+    Path_T tempPrefix, oPrefix;
     Node_T oNext, oCurr;
 
     /* ------------------ STEP 1: Validate global state and input path ------------------ */
@@ -1016,7 +1016,7 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
     /* ------------------ STEP 3: Traverse to target node ------------------ */
 
     for (i = 1; i <= depth; i++) {
-        Path_T oPrefix = Path_prefix(oTargetPath, i);
+        Path_prefix(oTargetPath, i, &oPrefix);
         if (oPrefix == NULL) {
             Path_free(oTargetPath);
             return MEMORY_ERROR;
